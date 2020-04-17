@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-    id: String,
     email: String,
     password: String,
     items: [{ 
@@ -20,6 +19,7 @@ UserSchema.methods.toJSON = function(){
         email: this.email,
         password: this.password,
         items: this.items,
+        events: this.events,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt
     }

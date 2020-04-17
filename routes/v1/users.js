@@ -28,6 +28,16 @@ router.param('event', function(req, res, next, id){
     });
 });
 
+  
+/**
+ * Create a user.
+ */
+router.post('/', async function(req, res, next){
+    console.log('create user----->', req.body);
+    let user = new User(req.body);
+    await user.save();
+    return res.json({ user: user.toJSON() });
+   });
 
 
 
@@ -104,11 +114,6 @@ router.post('/:user/events/:event/items', async function(req, res, next){
 
 
 
-
- /**
- * Create an event for a user.
- * POST users/:userId/events
- */
 
 
 
