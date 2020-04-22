@@ -29,6 +29,16 @@ router.param('event', function(req, res, next, id){
 });
 
 
+/**
+ * Create a user.
+ */
+router.post('/', async function(req, res, next){
+    console.log('create user', req.body);
+    let user = new User(req.body);
+    await user.save();
+    return res.json({ user: user.toJSON() });
+});
+
 
 
 /**
@@ -66,7 +76,7 @@ router.get('/:user', async function(req, res, next){
 
 /**
  * Get a user's items
- * GET /v1/users/:user/articles
+ * GET /v1/users/:user/item
  */
 router.get('/:user/items', async function(req, res, next){
     let items = await Item.find({ author: req.user });
@@ -105,12 +115,26 @@ router.post('/:user/events/:event/items', async function(req, res, next){
 
 
 
+
  /**
  * Create an event for a user.
  * POST users/:userId/events
  */
-
-
+ 
+router.post('/:user/events', async function (req, res, next) {
+    console.log('****** Create Event ******', req.body);
+    let event = new Event(req.body)
+    event.author = req.user;
+    await event.save().then(function ( ) {
+        if (!req.user.events) {
+            req.user.events = [];
+          }
+    })
+    req.user.events.push(event);
+    return req.user.save().then(function () {
+    return res.json({ event: event.toJSON() })
+    });
+})
 
 
 /************
@@ -119,17 +143,42 @@ router.post('/:user/events/:event/items', async function(req, res, next){
 
 /**
  * Log In
- * POST /v1/users/login
+ * POST /v1/users/admin-login
  */
 
-router.post('/login', async function(req, res, next) {
+router.post('/admin-login', async function(req, res, next) {
     if(!req.body.email) {
         return res.status(422).json({
             success: false, 
             message: 'Email cannot be blank'
         })
     }
-    let user = await User.findOne({ email: req.body.email });
+    let user = await User.findOne({ email: req.body.email});
+    if (!user) {
+        return res.status(422).json({
+            success: false, 
+            message: 'User does not exist'
+        })
+    }
+    return res.json({ user: user.toJSON() });
+
+   
+})
+
+
+/**
+ * Log In
+ * POST /v1/users/user-login
+ */
+
+router.post('/enter-code', async function(req, res, next) {
+    if(!req.body.code) {
+        return res.status(422).json({
+            success: false, 
+            message: 'Code cannot be blank'
+        })
+    }
+    let user = await User.findOne({ code: req.body.code });
     if (!user) {
         return res.status(422).json({
             success: false, 
