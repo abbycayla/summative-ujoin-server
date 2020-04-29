@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const EventSchema = new mongoose.Schema({
-    id: String,
     title: String,
     body: String,
     code: String,
@@ -16,8 +15,8 @@ const EventSchema = new mongoose.Schema({
 }, {timestamps: true});
 
 EventSchema.methods.toJSON = function(){
-    let item = {
-        id: this.id,
+    let event = {
+        id: this._id,
         title: this.title,
         body: this.body,
         items: this.items,
@@ -28,10 +27,10 @@ EventSchema.methods.toJSON = function(){
     };
 
     if(this.author){
-        item.author = this.author.toJSON();
+        event.author = this.author.toJSON();
     }
     
-    return item;
+    return event;
 
 };
 

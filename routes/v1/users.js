@@ -109,8 +109,37 @@ router.post('/:user/events/:event/items', async function(req, res, next){
     return res.json({ item: item.toJSON() });
 });
 
+ 
 
 
+
+
+/**
+ * Get a user's events
+ * GET /v1/users/:user/events
+ */
+router.get('/:user/events', async function(req, res, next){
+    let events = await Event.find({ author: req.user });
+    return res.json({
+        events: events.map(function(event){
+            return event.toJSON();
+        })
+    });
+});
+
+
+/**
+ * Get an event by id
+ * GET /v1/users/:user/events
+ */
+router.get('/:user/events/:event', async function(req, res, next){
+    // let events = await Event.find({ event: req.event.title });
+    // return res.json({
+    //     events: events.map(function(event){
+            return res.json ({event: req.event.toJSON()})        
+                // })
+    // });
+});
 
 
 
@@ -135,6 +164,27 @@ router.post('/:user/events', async function (req, res, next) {
     return res.json({ event: event.toJSON() })
     });
 })
+
+
+/**
+ * Delete a users Event
+ * DELETE /v1/users/:user/events
+ */
+router.delete("/:user/events/:event", function(req, res, next) {
+    return Event.findByIdAndRemove(req.event.id).then(function(){
+      return res.sendStatus(204);
+    });
+  });
+
+  /**
+ * Delete a users item
+ * DELETE /v1/users/:user/items
+ */
+router.delete("/:user/items/:item", function(req, res, next) {
+    return Item.findByIdAndRemove(req.item.id).then(function(){
+      return res.sendStatus(204);
+    });
+  });
 
 
 /************
