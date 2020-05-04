@@ -55,12 +55,7 @@ router.param('item', function(req, res, next, id){
 // })
 
 //---------- END ----------//
-/********** GET AN ITEM BY ID **********/
 
-// router.get('/:item', function (req, res, next) {
-//     console.log('***** Item by id *****')
-//     return res.json({ item: req.item.toJSON() })
-// })
 
 //---------- END ----------//
 

@@ -15,11 +15,11 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.methods.toJSON = function(){
     return {
-        id: this.id,
+        id: this._id,
         email: this.email,
         password: this.password,
         items: this.items,
-        events: this.events,
+        events: this.event,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt
     }
