@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-    id: String,
     email: String,
     password: String,
     items: [{ 
@@ -16,10 +15,11 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.methods.toJSON = function(){
     return {
-        id: this.id,
+        id: this._id,
         email: this.email,
         password: this.password,
         items: this.items,
+        events: this.event,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt
     }

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
-    id: String,
     body: String,
     //create reference to the author
     author: { 
@@ -16,7 +15,7 @@ const ItemSchema = new mongoose.Schema({
 
 ItemSchema.methods.toJSON = function(){
     let item = {
-        id: this.id,
+        id: this._id,
         body: this.body,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
