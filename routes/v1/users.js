@@ -29,6 +29,18 @@ router.param('event', function(req, res, next, id){
 });
 
 
+router.param('item', function(req, res, next, id){
+    Item.findById(id)
+    .then(function(item){
+        if(!item){
+            return res.sendStatus(404);
+        }
+        req.item = item;
+        return next();
+    });
+});
+
+
 /**
  * Create a user.
  */
@@ -78,6 +90,19 @@ router.get('/:user', async function(req, res, next){
  * Get a user's items
  * GET /v1/users/:user/item
  */
+router.get('/:user/events/:event/items', async function(req, res, next){
+    let items = await Item.find({ author: req.user });
+    return res.json({
+        items: items.map(function(item){
+            return item.toJSON();
+        })
+    });
+}); 
+ 
+/**
+ * Get all items
+ * GET /v1/users/:user/item
+ */
 router.get('/:user/items', async function(req, res, next){
     let items = await Item.find({ author: req.user });
     return res.json({
@@ -86,17 +111,16 @@ router.get('/:user/items', async function(req, res, next){
         })
     });
 }); 
-
-
+ 
 /**
  * Create an item for a user.
  * POST users/:userId/events/:event/items
  */
 router.post('/:user/events/:event/items', async function(req, res, next){
     if(!req.user){
-        return res.status(422).json({
-            success: false, message: 'User does not exist'
-        });
+    return res.status(422).json({
+    success: false, message: 'User does not exist'
+    });
     }
     let item = new Item (req.body);
     item.author = req.user;
@@ -107,10 +131,24 @@ router.post('/:user/events/:event/items', async function(req, res, next){
     await req.user.save();
     await req.event.save();
     return res.json({ item: item.toJSON() });
-});
-
+   });
  
-
+   router.get('/:user/events/:event/items', async function(req, res, next){
+    let items = await Item.find({ author: req.user });
+    return res.json({
+        items: items.map(function(item){
+            return item.toJSON();
+        })
+    });
+}); 
+ 
+ 
+/********** GET AN ITEM BY ID **********/
+ 
+router.get('/:user/events/:event/items/:item', function (req, res, next) {
+    console.log('***** Item by id *****')
+    return res.json({ item: req.item.toJSON() })
+})
 
 
 
@@ -166,9 +204,11 @@ router.post('/:user/events', async function (req, res, next) {
 })
 
 
+
+
 /**
  * Delete a users Event
- * DELETE /v1/users/:user/events
+ * DELETE /v1/users/:user/events/:event
  */
 router.delete("/:user/events/:event", function(req, res, next) {
     return Event.findByIdAndRemove(req.event.id).then(function(){
@@ -178,12 +218,12 @@ router.delete("/:user/events/:event", function(req, res, next) {
 
   /**
  * Delete a users item
- * DELETE /v1/users/:user/items
+ * DELETE /v1/users/:user/items/:item
  */
-router.delete("/:user/items/:item", function(req, res, next) {
-    return Item.findByIdAndRemove(req.item.id).then(function(){
+router.delete("/:user/events/:event/items/:item", async function(req, res, next) {
+    await Item.findByIdAndRemove(req.item.id)
       return res.sendStatus(204);
-    });
+  
   });
 
 
