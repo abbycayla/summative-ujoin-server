@@ -50,6 +50,28 @@ router.post('/', async function(req, res, next){
     return res.json({ user: user.toJSON() });
    });
 
+router.param('item', function(req, res, next, id){
+    Item.findById(id)
+    .then(function(item){
+        if(!item){
+            return res.sendStatus(404);
+        }
+        req.item = item;
+        return next();
+    });
+});
+
+
+/**
+ * Create a user.
+ */
+router.post('/', async function(req, res, next){
+    console.log('create user', req.body);
+    let user = new User(req.body);
+    await user.save();
+    return res.json({ user: user.toJSON() });
+});
+
 
 
 /**
@@ -98,7 +120,6 @@ router.get('/:user/events/:event/items', async function(req, res, next){
         })
     });
 }); 
-
 /**
  * Get all items
  * GET /v1/users/:user/item
@@ -111,8 +132,7 @@ router.get('/:user/items', async function(req, res, next){
         })
     });
 }); 
-
-
+ 
 /**
  * Create an item for a user.
  * POST users/:userId/events/:event/items
@@ -133,26 +153,28 @@ router.post('/:user/events/:event/items', async function(req, res, next){
     await req.event.save();
     return res.json({ item: item.toJSON() });
    });
+ 
+/********** GET AN ITEM BY ID **********/
+ 
+router.get('/:user/events/:event/items/:item', function (req, res, next) {
+    console.log('***** Item by id *****')
+    return res.json({ item: req.item.toJSON() })
+})
 
-   router.get('/:user/events/:event/items', async function(req, res, next){
-    let items = await Item.find({ author: req.user });
-    return res.json({
-        items: items.map(function(item){
-            return item.toJSON();
-        })
-    });
-}); 
+
 
 /**
- * Delete a users item
- * DELETE /v1/users/:user/items/:item
+ * Get a user's events
+ * GET /v1/users/:user/events
  */
-router.delete("/:user/items/:item", function(req, res, next) {
-    return Item.findByIdAndRemove(req.item.id).then(function(){
-    return res.sendStatus(204);
+router.get('/:user/events', async function(req, res, next){
+    let events = await Event.find({ author: req.user });
+    return res.json({
+        events: events.map(function(event){
+            return event.toJSON();
+        })
     });
-    });
-
+});
  
 /********** GET AN ITEM BY ID **********/
 
@@ -161,6 +183,18 @@ router.get('/:user/events/:event/items/:item', function (req, res, next) {
     return res.json({ item: req.item.toJSON() })
 })
 
+/**
+ * Get an event by id
+ * GET /v1/users/:user/events
+ */
+router.get('/:user/events/:event', async function(req, res, next){
+    // let events = await Event.find({ event: req.event.title });
+    // return res.json({
+    //     events: events.map(function(event){
+            return res.json ({event: req.event.toJSON()})        
+                // })
+    // });
+});
 
 
 /**
@@ -194,6 +228,21 @@ router.get('/:user/events/:event', async function(req, res, next){
  * Create an event for a user.
  * POST users/:userId/events
  */
+ 
+router.post('/:user/events', async function (req, res, next) {
+    console.log('****** Create Event ******', req.body);
+    let event = new Event(req.body)
+    event.author = req.user;
+    await event.save().then(function ( ) {
+        if (!req.user.events) {
+            req.user.events = [];
+          }
+    })
+    req.user.events.push(event);
+    return req.user.save().then(function () {
+    return res.json({ event: event.toJSON() })
+    });
+})
 
 router.post('/:user/events', async function (req, res, next) {
     console.log('****** Create Event ******', req.body);
@@ -223,6 +272,27 @@ router.delete("/:user/events/:event", function(req, res, next) {
 
 
 
+/**
+ * Delete a users Event
+ * DELETE /v1/users/:user/events/:event
+ */
+router.delete("/:user/events/:event", function(req, res, next) {
+    return Event.findByIdAndRemove(req.event.id).then(function(){
+      return res.sendStatus(204);
+    });
+  });
+
+  /**
+ * Delete a users item
+ * DELETE /v1/users/:user/items/:item
+ */
+router.delete("/:user/events/:event/items/:item", async function(req, res, next) {
+    await Item.findByIdAndRemove(req.item.id)
+      return res.sendStatus(204);
+  
+  });
+
+
 /************
  * Auth
  ***********/
@@ -230,8 +300,7 @@ router.delete("/:user/events/:event", function(req, res, next) {
 /**
  * Log In
  * POST /v1/users/admin-login
- */
- 
+
 router.post('/admin-login', async function(req, res, next) {
 if(!req.body.email) {
 return res.status(422).json({
@@ -250,6 +319,7 @@ return res.json({ user:user.toJSON() });
  
 
 })
+
 
 
 /**

@@ -53,13 +53,7 @@ router.param('event', function(req, res, next, id){
 
 //---------- END ----------//
 
-/********** DELETE AN EVENT **********/
 
-// router.delete('/:event', async function (req, res, next) {
-//     console.log('***** Event Deleted *****');
-//     await Event.findByIdAndRemove(req.item.id)
-//     return res.sendStatus(204)
-// })
 
 
 
