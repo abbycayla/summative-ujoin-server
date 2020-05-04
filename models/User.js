@@ -18,7 +18,7 @@ UserSchema.methods.toJSON = function(){
         email: this.email,
         password: this.password,
         items: this.items,
-        events: this.events,
+        events: this.event,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt
     }

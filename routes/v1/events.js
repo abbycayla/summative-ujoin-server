@@ -18,6 +18,30 @@ router.param('event', function(req, res, next, id){
 
 
 
+// router.param('user', function(req, res, next, id){
+//     User.findById(id)
+//     .then(function(user){
+//         if(!user){
+//             return res.sendStatus(404);
+//         }
+//         req.user = user;
+//         return next();
+//     });
+// });
+
+// /**
+//  * Get an event by code
+//  * GET /v1/events/code/:code
+//  */
+// router.get('/code/:code', async function(req, res, next){
+//     // let events = await Event.find({ event: req.event.title });
+//     // return res.json({
+//     //     events: events.map(function(event){
+//             return res.json ({event: req.event.toJSON()})        
+//                 // })
+//     // });
+// }); 
+
 /********** CREATE AN EVENT **********/
 
 // router.post('/', async function (req, res, next) {

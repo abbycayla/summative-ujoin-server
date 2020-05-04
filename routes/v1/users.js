@@ -28,6 +28,27 @@ router.param('event', function(req, res, next, id){
     });
 });
 
+router.param('item', function(req, res, next, id){
+    Item.findById(id)
+    .then(function(item){
+        if(!item){
+            return res.sendStatus(404);
+        }
+        req.item = item;
+        return next();
+    });
+});
+
+  
+/**
+ * Create a user.
+ */
+router.post('/', async function(req, res, next){
+    console.log('create user----->', req.body);
+    let user = new User(req.body);
+    await user.save();
+    return res.json({ user: user.toJSON() });
+   });
 
 router.param('item', function(req, res, next, id){
     Item.findById(id)
@@ -77,6 +98,7 @@ router.get('/', function(req, res, next){
 router.get('/:user', async function(req, res, next){
     console.log('get user by id');
     await req.user.populate('items').execPopulate();
+    await req.user.populate('events').execPopulate();
     return res.json({ user: req.user.toJSON() });
 });
 
@@ -98,7 +120,6 @@ router.get('/:user/events/:event/items', async function(req, res, next){
         })
     });
 }); 
- 
 /**
  * Get all items
  * GET /v1/users/:user/item
@@ -133,16 +154,6 @@ router.post('/:user/events/:event/items', async function(req, res, next){
     return res.json({ item: item.toJSON() });
    });
  
-   router.get('/:user/events/:event/items', async function(req, res, next){
-    let items = await Item.find({ author: req.user });
-    return res.json({
-        items: items.map(function(item){
-            return item.toJSON();
-        })
-    });
-}); 
- 
- 
 /********** GET AN ITEM BY ID **********/
  
 router.get('/:user/events/:event/items/:item', function (req, res, next) {
@@ -164,7 +175,13 @@ router.get('/:user/events', async function(req, res, next){
         })
     });
 });
+ 
+/********** GET AN ITEM BY ID **********/
 
+router.get('/:user/events/:event/items/:item', function (req, res, next) {
+    console.log('***** Item by id *****')
+    return res.json({ item: req.item.toJSON() })
+})
 
 /**
  * Get an event by id
@@ -180,7 +197,31 @@ router.get('/:user/events/:event', async function(req, res, next){
 });
 
 
+/**
+ * Get a user's events
+ * GET /v1/users/:user/events
+ */
+router.get('/:user/events', async function(req, res, next){
+    let events = await Event.find({ author: req.user });
+    return res.json({
+        events: events.map(function(event){
+            return event.toJSON();
+        })
+    });
+});
 
+/**
+ * Get an event by id
+ * GET /v1/users/:user/events
+ */
+router.get('/:user/events/:event', async function(req, res, next){
+    // let events = await Event.find({ event: req.event.title });
+    // return res.json({
+    //     events: events.map(function(event){
+            return res.json ({event: req.event.toJSON()})        
+                // })
+    // });
+});
 
 
  /**
@@ -203,6 +244,31 @@ router.post('/:user/events', async function (req, res, next) {
     });
 })
 
+router.post('/:user/events', async function (req, res, next) {
+    console.log('****** Create Event ******', req.body);
+    let event = new Event(req.body)
+    event.author = req.user;
+    await event.save().then(function ( ) {
+        if (!req.user.events) {
+            req.user.events = [];
+          }
+    })
+    req.user.events.push(event);
+    return req.user.save().then(function () {
+    return res.json({ event: event.toJSON() })
+    });
+})
+
+
+/**
+ * Delete a users Event
+ * DELETE /v1/users/:user/events
+ */
+router.delete("/:user/events/:event", function(req, res, next) {
+    return Event.findByIdAndRemove(req.event.id).then(function(){
+    return res.sendStatus(204);
+    });
+    });
 
 
 
@@ -234,26 +300,26 @@ router.delete("/:user/events/:event/items/:item", async function(req, res, next)
 /**
  * Log In
  * POST /v1/users/admin-login
- */
 
 router.post('/admin-login', async function(req, res, next) {
-    if(!req.body.email) {
-        return res.status(422).json({
-            success: false, 
-            message: 'Email cannot be blank'
-        })
-    }
-    let user = await User.findOne({ email: req.body.email});
-    if (!user) {
-        return res.status(422).json({
-            success: false, 
-            message: 'User does not exist'
-        })
-    }
-    return res.json({ user: user.toJSON() });
+if(!req.body.email) {
+return res.status(422).json({
+success:false, 
+message:'Email cannot be blank'
+ })
+ }
+let user = await User.findOne({ email:req.body.email});
+if (!user) {
+return res.status(422).json({
+success:false, 
+message:'User does not exist'
+ })
+ }
+return res.json({ user:user.toJSON() });
+ 
 
-   
 })
+
 
 
 /**
@@ -279,6 +345,8 @@ router.post('/enter-code', async function(req, res, next) {
 
    
 })
+
+
      
 
 

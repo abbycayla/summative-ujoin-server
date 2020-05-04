@@ -56,12 +56,6 @@ router.post('/', async function (req, res, next) {
 // })
 
 //---------- END ----------//
-/********** GET AN ITEM BY ID **********/
-
-router.get('/:item', function (req, res, next) {
-    console.log('***** Item by id *****')
-    return res.json({ item: req.item.toJSON() })
-})
 
 //---------- END ----------//
 
